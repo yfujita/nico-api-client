@@ -2,33 +2,20 @@ package jp.niconico.api.method;
 
 import java.net.URLDecoder;
 
-import jp.niconico.api.http.HttpClientSetting;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import jp.niconico.api.entity.FlvInfo;
-import jp.niconico.api.entity.LoginInfo;
 import jp.niconico.api.exception.NiconicoException;
 
 public class NicoGetFlv {
-    private LoginInfo loginInfo = null;
-
     private String methodUrl = "http://flapi.nicovideo.jp/api/getflv/";
 
-    public NicoGetFlv(LoginInfo loginInfo) {
-        this.loginInfo = loginInfo;
-    }
-
-    public FlvInfo excute(String id) throws NiconicoException {
-        if (loginInfo == null) {
-            throw new NiconicoException("Need to login.");
-        }
-
-        DefaultHttpClient httpClient = null;
+    public FlvInfo excute(HttpClient client, String id) throws NiconicoException {
         FlvInfo info = null;
 
         try {
@@ -38,11 +25,9 @@ public class NicoGetFlv {
                 url.append("?as3=1");
             }
 
-            httpClient = HttpClientSetting.createHttpClient();
             HttpGet httpGet = new HttpGet(url.toString());
-            httpClient.setCookieStore(loginInfo.cookie);
 
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = client.execute(httpGet);
 
             HttpEntity entity = response.getEntity();
             String[] results = EntityUtils.toString(entity).split("&");
@@ -89,9 +74,7 @@ public class NicoGetFlv {
         } catch (Exception e) {
             throw new NiconicoException(e);
         } finally {
-            if (httpClient == null) {
-                httpClient.getConnectionManager().shutdown();
-            }
+            //ignore
         }
 
         if (StringUtils.isBlank(info.threadId)) {

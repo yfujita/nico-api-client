@@ -4,20 +4,18 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import jp.niconico.api.http.HttpClientSetting;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jp.niconico.api.entity.CommentInfo;
 import jp.niconico.api.entity.FlvInfo;
-import jp.niconico.api.entity.LoginInfo;
 import jp.niconico.api.exception.NiconicoException;
 
 public class NicoGetComment {
@@ -29,26 +27,20 @@ public class NicoGetComment {
 
     private FlvInfo flvInfo = null;
 
-    private LoginInfo loginInfo = null;
-
-    public NicoGetComment(LoginInfo loginInfo, FlvInfo flvInfo) {
-        this.loginInfo = loginInfo;
+    public NicoGetComment(FlvInfo flvInfo) {
         this.flvInfo = flvInfo;
     }
 
-    public List<CommentInfo> excute(String id) throws NiconicoException {
-        return excute(id, null);
+    public List<CommentInfo> excute(HttpClient client, String id) throws NiconicoException {
+        return excute(client, id, null);
     }
 
-    public List<CommentInfo> excute(String id, Date date) throws NiconicoException {
-        DefaultHttpClient httpClient = null;
+    public List<CommentInfo> excute(HttpClient client, String id, Date date) throws NiconicoException {
         List<CommentInfo> list = new ArrayList<CommentInfo>();
 
         try {
-            httpClient = HttpClientSetting.createHttpClient();
             HttpGet httpGet = new HttpGet(threadKeyUrl + flvInfo.threadId);
-            httpClient.setCookieStore(loginInfo.cookie);
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = client.execute(httpGet);
 
             String[] tmps = EntityUtils.toString(response.getEntity()).split(
                     "&");
@@ -76,8 +68,7 @@ public class NicoGetComment {
             long when = 0;
             if (date != null) {
                 httpGet = new HttpGet(waybackKeyUrl + flvInfo.threadId);
-                httpClient.setCookieStore(loginInfo.cookie);
-                response = httpClient.execute(httpGet);
+                response = client.execute(httpGet);
                 tmps = EntityUtils.toString(response.getEntity()).split(
                         "&");
                 for (String tmp : tmps) {
@@ -155,7 +146,7 @@ public class NicoGetComment {
 
             HttpPost httpPost = new HttpPost(flvInfo.ms);
             httpPost.setEntity(new StringEntity(xml.toString()));
-            response = httpClient.execute(httpPost);
+            response = client.execute(httpPost);
 
             String responseXml = EntityUtils.toString(response.getEntity(),
                     "UTF-8");
@@ -163,9 +154,7 @@ public class NicoGetComment {
         } catch (Exception e) {
             throw new NiconicoException(e);
         } finally {
-            if (httpClient != null) {
-                httpClient.getConnectionManager().shutdown();
-            }
+            //ignore
         }
 
         return list;

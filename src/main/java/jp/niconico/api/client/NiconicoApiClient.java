@@ -6,12 +6,23 @@ import java.util.List;
 
 import jp.niconico.api.entity.*;
 import jp.niconico.api.exception.NiconicoException;
+import jp.niconico.api.http.HttpClientSetting;
 import jp.niconico.api.method.*;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.HttpClient;
 
 public class NiconicoApiClient {
-    private LoginInfo loginInfo = null;
+    protected final HttpClient client;
+
+    boolean isLogin = false;
+
+    public NiconicoApiClient() {
+        client = HttpClientSetting.createHttpClient();
+    }
+
+    public NiconicoApiClient(HttpClient client) {
+        this.client = client;
+    }
 
     /**
      * niconicoのログイン情報を設定する。
@@ -21,9 +32,9 @@ public class NiconicoApiClient {
      * @throws NiconicoException
      */
     public void login(String mail, String password) throws NiconicoException {
-        loginInfo = null;
         NicoLogin method = new NicoLogin();
-        loginInfo = method.excute(mail, password);
+        method.excute(client, mail, password);
+        isLogin = true;
     }
 
     /**
@@ -32,11 +43,7 @@ public class NiconicoApiClient {
      * @return true:ログインしている false:ログインしていない
      */
     public boolean isLogin() {
-        boolean ret = true;
-        if (loginInfo == null || StringUtils.isBlank(loginInfo.mail) || loginInfo.cookie == null) {
-            ret = false;
-        }
-        return ret;
+        return isLogin;
     }
 
     /**
@@ -52,12 +59,12 @@ public class NiconicoApiClient {
      */
     public List<SearchResult> search(String query, String sort, int page,
                                      String order, boolean tagSearch) throws NiconicoException {
-        if (loginInfo == null) {
+        if (!isLogin) {
             return null;
         }
 
-        NicoSearch method = new NicoSearch(loginInfo);
-        return method.excute(query, sort, page, order, tagSearch);
+        NicoSearch method = new NicoSearch();
+        return method.excute(client, query, sort, page, order, tagSearch);
     }
 
     /**
@@ -68,8 +75,8 @@ public class NiconicoApiClient {
      * @throws NiconicoException
      */
     public FlvInfo getFlv(String id) throws NiconicoException {
-        NicoGetFlv method = new NicoGetFlv(loginInfo);
-        return method.excute(id);
+        NicoGetFlv method = new NicoGetFlv();
+        return method.excute(client, id);
     }
 
     /**
@@ -82,8 +89,8 @@ public class NiconicoApiClient {
     public List<CommentInfo> getComment(String id) throws NiconicoException {
         FlvInfo flvInfo = getFlv(id);
 
-        NicoGetComment method = new NicoGetComment(loginInfo, flvInfo);
-        return method.excute(id);
+        NicoGetComment method = new NicoGetComment(flvInfo);
+        return method.excute(client, id);
     }
 
     /**
@@ -97,8 +104,8 @@ public class NiconicoApiClient {
     public List<CommentInfo> getPastComment(String id, Date date) throws NiconicoException {
         FlvInfo flvInfo = getFlv(id);
 
-        NicoGetComment method = new NicoGetComment(loginInfo, flvInfo);
-        return method.excute(id, date);
+        NicoGetComment method = new NicoGetComment(flvInfo);
+        return method.excute(client, id, date);
     }
 
     /**
@@ -110,7 +117,7 @@ public class NiconicoApiClient {
      */
     public ThumbInfo getThumbInfo(String id) throws NiconicoException {
         NicoGetThumbInfo method = new NicoGetThumbInfo();
-        return method.excute(id);
+        return method.excute(client, id);
     }
 
     /**
@@ -123,7 +130,7 @@ public class NiconicoApiClient {
      */
     public List<RankingInfo> getRanking(String period, String rankKind) throws NiconicoException {
         NicoGetRanking method = new NicoGetRanking();
-        return method.execute(period, rankKind);
+        return method.execute(client, period, rankKind);
     }
 
     /**
@@ -133,8 +140,12 @@ public class NiconicoApiClient {
      * @throws NiconicoException
      */
     public List<Mylist> getOwnerMylists() throws NiconicoException {
-        NicoGetMylist method = new NicoGetMylist(loginInfo);
-        return method.getOwnerMylists();
+        if(!isLogin) {
+            return null;
+        }
+
+        NicoGetMylist method = new NicoGetMylist();
+        return method.getOwnerMylists(client);
     }
 
     /**
@@ -145,8 +156,8 @@ public class NiconicoApiClient {
      * @throws NiconicoException
      */
     public List<MylistItem> getMylistItems(String mylistId) throws NiconicoException {
-        NicoGetMylist method = new NicoGetMylist(loginInfo);
-        return method.getMylistItems(mylistId);
+        NicoGetMylist method = new NicoGetMylist();
+        return method.getMylistItems(client, mylistId);
     }
 
     /**
@@ -156,8 +167,12 @@ public class NiconicoApiClient {
      * @throws NiconicoException
      */
     public List<MylistItem> getToriaezuMylist() throws NiconicoException {
-        NicoGetMylist method = new NicoGetMylist(loginInfo);
-        return method.getToriaezuMylist();
+        if(!isLogin) {
+            return null;
+        }
+
+        NicoGetMylist method = new NicoGetMylist();
+        return method.getToriaezuMylist(client);
     }
 
     /**
@@ -171,7 +186,11 @@ public class NiconicoApiClient {
     public File downloadVideo(String id, String destDir) throws NiconicoException {
         FlvInfo flvInfo = getFlv(id);
         ThumbInfo thumbInfo = getThumbInfo(id);
-        NicoDownloadVideo method = new NicoDownloadVideo(id, loginInfo, flvInfo, thumbInfo);
-        return method.execute(destDir);
+        NicoDownloadVideo method = new NicoDownloadVideo(id, flvInfo, thumbInfo);
+        return method.execute(client, destDir);
+    }
+
+    public void shutdown() {
+        client.getConnectionManager().shutdown();
     }
 }

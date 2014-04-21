@@ -1,13 +1,11 @@
 package jp.niconico.api.method;
 
-import jp.niconico.api.entity.LoginInfo;
 import jp.niconico.api.entity.Mylist;
 import jp.niconico.api.entity.MylistItem;
 import jp.niconico.api.exception.NiconicoException;
-import jp.niconico.api.http.HttpClientSetting;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import java.util.List;
@@ -19,75 +17,54 @@ public class NicoGetMylist {
 
     private String mylistUrl = "http://nicovideo.jp/api/mylist/list?group_id=";
 
-    private LoginInfo loginInfo;
-
-    public NicoGetMylist(LoginInfo loginInfo) {
-        this.loginInfo = loginInfo;
-    }
-
-    public List<MylistItem> getToriaezuMylist() throws NiconicoException {
-        DefaultHttpClient httpClient = null;
+    public List<MylistItem> getToriaezuMylist(HttpClient client) throws NiconicoException {
         List<MylistItem> list = null;
         try {
-            httpClient = HttpClientSetting.createHttpClient();
-            httpClient.setCookieStore(loginInfo.cookie);
             HttpGet httpGet = new HttpGet(deflistUrl);
 
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = client.execute(httpGet);
 
             String json = EntityUtils.toString(response.getEntity());
             list = MylistItem.parse(json);
         } catch (Exception e) {
             throw new NiconicoException(e.getMessage());
         } finally {
-            if (httpClient != null) {
-                httpClient.getConnectionManager().shutdown();
-            }
+            //ignore
         }
 
         return list;
     }
 
-    public List<Mylist> getOwnerMylists() throws NiconicoException {
-        DefaultHttpClient httpClient = null;
+    public List<Mylist> getOwnerMylists(HttpClient client) throws NiconicoException {
         List<Mylist> list = null;
         try {
-            httpClient = HttpClientSetting.createHttpClient();
-            httpClient.setCookieStore(loginInfo.cookie);
             HttpGet httpGet = new HttpGet(mylistgroupUrl);
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = client.execute(httpGet);
 
             String json = EntityUtils.toString(response.getEntity());
             list = Mylist.parse(json);
         } catch (Exception e) {
             throw new NiconicoException(e);
         } finally {
-            if (httpClient != null) {
-                httpClient.getConnectionManager().shutdown();
-            }
+            //ignore
         }
 
         return list;
     }
 
-    public List<MylistItem> getMylistItems(String mylistId) throws NiconicoException {
-        DefaultHttpClient httpClient = null;
+    public List<MylistItem> getMylistItems(HttpClient client, String mylistId) throws NiconicoException {
         List<MylistItem> list = null;
         try {
-            httpClient = new DefaultHttpClient();
-            httpClient.setCookieStore(loginInfo.cookie);
             HttpGet httpGet = new HttpGet(mylistUrl + mylistId);
 
-            HttpResponse response = httpClient.execute(httpGet);
+            HttpResponse response = client.execute(httpGet);
 
             String json = EntityUtils.toString(response.getEntity());
             list = MylistItem.parse(json);
         } catch (Exception e) {
             throw new NiconicoException(e);
         } finally {
-            if (httpClient != null) {
-                httpClient.getConnectionManager().shutdown();
-            }
+            //ignore
         }
 
         return list;
