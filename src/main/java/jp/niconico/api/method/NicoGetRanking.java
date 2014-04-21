@@ -12,13 +12,43 @@ import java.util.List;
 public class NicoGetRanking {
     private String methodUrl = "http://www.nicovideo.jp/ranking/";
 
-    public List<RankingInfo> execute(HttpClient client, String period, String rankKind) throws NiconicoException {
+    public static enum PeriodType {
+        HOURLY("hourly"), DAYLY("daily"), WEEKLY("weeky"), MONTHLY("monthly"), TOTAL("total");
+
+        private final String str;
+
+        private PeriodType(String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public static enum RankingType {
+        FAV("fav"), VIEW("view"), RES("res"), MYLIST("mylist");
+
+        private final String str;
+
+        private RankingType(String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public List<RankingInfo> execute(HttpClient client, PeriodType period, RankingType rankType) throws NiconicoException {
         List<RankingInfo> results = null;
         List<RankingInfo> rankingList = null;
         try {
             StringBuilder url = new StringBuilder(methodUrl);
-            if ("res".equals(rankKind) || "mylist".equals(rankKind) || "view".equals(rankKind) || "fav".equals(rankKind)) {
-                url.append(rankKind);
+            if ("res".equals(rankType) || "mylist".equals(rankType) || "view".equals(rankType) || "fav".equals(rankType)) {
+                url.append(rankType);
                 url.append("/");
             }
             if ("hourly".equals(period) || "daily".equals(period) || "weekly".equals(period) || "monthly".equals(period)
@@ -32,7 +62,7 @@ public class NicoGetRanking {
             HttpResponse response = client.execute(httpGet);
 
             String xml = EntityUtils.toString(response.getEntity());
-            rankingList = RankingInfo.parse(period, rankKind, xml);
+            rankingList = RankingInfo.parse(period, rankType, xml);
 
 
         } catch (Exception e) {

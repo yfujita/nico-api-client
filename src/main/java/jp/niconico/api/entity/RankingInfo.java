@@ -1,6 +1,7 @@
 package jp.niconico.api.entity;
 
 import jp.niconico.api.exception.NiconicoException;
+import jp.niconico.api.method.NicoGetRanking;
 
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -41,7 +42,9 @@ public class RankingInfo {
 
     public long mylistCounterPeriod;
 
-    public static List<RankingInfo> parse(String period, String rankKind, String xml) throws NiconicoException {
+    public static List<RankingInfo> parse(NicoGetRanking.PeriodType period,
+                                          NicoGetRanking.RankingType rankType, String xml)
+            throws NiconicoException {
         List<RankingInfo> list = new ArrayList<RankingInfo>();
 
         try {
@@ -53,8 +56,8 @@ public class RankingInfo {
 
                 RankingInfo info = new RankingInfo();
                 info.rank = i + 1;
-                info.period = period;
-                info.rankKind = rankKind;
+                info.period = period.toString();
+                info.rankKind = rankType.toString();
                 info.title = item.title.substring(item.title.indexOf("：") + 1);
                 info.link = item.link;
                 info.pubDate = item.pubDate;
@@ -83,7 +86,7 @@ public class RankingInfo {
 
                 String tmpPeriod;
                 if ("hourly".equals(period) || "daily".equals(period) || "weekly".equals(period) || "monthly".equals(period)) {
-                    tmpPeriod = period;
+                    tmpPeriod = period.toString();
                 } else {
                     tmpPeriod = "daily";
                 }

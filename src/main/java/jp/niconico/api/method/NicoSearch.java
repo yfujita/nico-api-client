@@ -19,8 +19,38 @@ public class NicoSearch {
 
     private final String methodUrl = "http://ext.nicovideo.jp/api/search/";
 
-    public List<SearchResult> excute(HttpClient client, String query, String sort, int page,
-                                     String order, boolean tagSearch) throws NiconicoException {
+    public static enum SortType {
+        LASTESTCOMMENT("n"), VIEW("v"), MYLIST("m"), COMMENTNUM("r"), UPLOADDAY("d"), LENGTH("l");
+
+        private final String str;
+
+        private SortType(String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public static enum OrderType {
+        ASC("a"), DESC("d");
+
+        private final String str;
+
+        private OrderType(String str) {
+            this.str = str;
+        }
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
+    public List<SearchResult> excute(HttpClient client, String query, SortType sort, int page,
+                                     OrderType order, boolean tagSearch) throws NiconicoException {
         List<SearchResult> results = null;
         try {
             StringBuilder url = new StringBuilder(methodUrl);

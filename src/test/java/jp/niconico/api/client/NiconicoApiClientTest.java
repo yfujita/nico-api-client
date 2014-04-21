@@ -2,6 +2,8 @@ package jp.niconico.api.client;
 
 import jp.niconico.api.entity.*;
 import jp.niconico.api.exception.NiconicoException;
+import jp.niconico.api.method.NicoGetRanking;
+import jp.niconico.api.method.NicoSearch;
 import junit.framework.TestCase;
 import org.apache.commons.lang.StringUtils;
 
@@ -52,7 +54,8 @@ public class NiconicoApiClientTest extends TestCase {
             client.login(mail, password);
             boolean tagsearch = false;
             for (int i = 0; i < 2; i++) {
-                List<SearchResult> results = client.search("うたの☆プリンスさまっ♪マジLOVE2000%", "m", 1, "d", tagsearch);
+                List<SearchResult> results = client.search("うたの☆プリンスさまっ♪マジLOVE2000%",
+                        NicoSearch.SortType.MYLIST, 1, NicoSearch.OrderType.DESC, tagsearch);
                 assertTrue(results.size() > 0);
                 for (SearchResult result : results) {
                     assertNotNull(result.id);
@@ -133,12 +136,19 @@ public class NiconicoApiClientTest extends TestCase {
     public void test_get_ranking_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
-            String[] periods = {"hourly", "daily", "weekly", "monthly", "total"};
-            String[] kinds = {"fav", "view", "res", "mylist"};
-            for (String period : periods) {
+            NicoGetRanking.PeriodType[] periods = {NicoGetRanking.PeriodType.HOURLY,
+                    NicoGetRanking.PeriodType.DAYLY,
+                    NicoGetRanking.PeriodType.WEEKLY,
+                    NicoGetRanking.PeriodType.MONTHLY,
+                    NicoGetRanking.PeriodType.TOTAL};
+            NicoGetRanking.RankingType[] types = {NicoGetRanking.RankingType.FAV,
+                    NicoGetRanking.RankingType.VIEW,
+                    NicoGetRanking.RankingType.RES,
+                    NicoGetRanking.RankingType.MYLIST};
+            for (NicoGetRanking.PeriodType period : periods) {
 
-                for (String kind : kinds) {
-                    List<RankingInfo> results = client.getRanking(period, kind);
+                for (NicoGetRanking.RankingType type : types) {
+                    List<RankingInfo> results = client.getRanking(period, type);
                     assertTrue(results.size() == 100);
                     long rank = 1;
                     for (RankingInfo result : results) {

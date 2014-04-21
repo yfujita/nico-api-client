@@ -50,15 +50,15 @@ public class NiconicoApiClient {
      * 動画を検索。
      *
      * @param query     検索クエリ
-     * @param sort      ソート種別 n:コメント日時 v:再生数 m:マイリスト r:コメント数 f:投稿日時 l:再生時間
+     * @param sort      SortType n:コメント日時 v:再生数 m:マイリスト r:コメント数 f:投稿日時 l:再生時間
      * @param page      取得ページ
-     * @param order     d:降順 a:昇順
+     * @param order     OrderType d:降順 a:昇順
      * @param tagSearch false:キーワード検索 true:タグ検索
      * @return 検索結果
      * @throws NiconicoException
      */
-    public List<SearchResult> search(String query, String sort, int page,
-                                     String order, boolean tagSearch) throws NiconicoException {
+    public List<SearchResult> search(String query, NicoSearch.SortType sort, int page,
+                                     NicoSearch.OrderType order, boolean tagSearch) throws NiconicoException {
         if (!isLogin) {
             return null;
         }
@@ -123,14 +123,15 @@ public class NiconicoApiClient {
     /**
      * ランキング取得
      *
-     * @param period   期間 hourly:1時間 daily:1日 weeky:週間 monthly:月間 total:全ての期間
-     * @param rankKind ランキング種別 fav:総合 view:再生数 res:コメント数 mylist:マイリスト数
+     * @param period   PeriodType 期間 hourly:1時間 daily:1日 weeky:週間 monthly:月間 total:全ての期間
+     * @param rankType RankingType fav:総合 view:再生数 res:コメント数 mylist:マイリスト数
      * @return ランキング情報
      * @throws NiconicoException
      */
-    public List<RankingInfo> getRanking(String period, String rankKind) throws NiconicoException {
+    public List<RankingInfo> getRanking(NicoGetRanking.PeriodType period,
+                                        NicoGetRanking.RankingType rankType) throws NiconicoException {
         NicoGetRanking method = new NicoGetRanking();
-        return method.execute(client, period, rankKind);
+        return method.execute(client, period, rankType);
     }
 
     /**
