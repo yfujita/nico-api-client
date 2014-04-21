@@ -14,7 +14,7 @@
 
 *動画検索*
 
-    List<SearchResult> results = client.search("らき☆すた", "m", 1, "d", true);
+    List<SearchResult> results = client.search("らき☆すた", SortType.MYLIST, 1, OrderType.DESC, true);
 
 *コメント取得*
 
@@ -22,7 +22,7 @@
 
 *ランキング取得*
 
-    List<RankingInfo> list = client.getRanking("daily", "fav");
+    List<RankingInfo> list = client.getRanking(PeriodType.DAILY, RankingType.FAV);
 
 *マイリスト取得*  
 ログインしているアカウントのマイリストを取得。
