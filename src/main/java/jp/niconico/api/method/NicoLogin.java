@@ -40,7 +40,8 @@ public class NicoLogin {
             Header[] resHeaders = response.getHeaders("Location");
             for (Header header : resHeaders) {
                 if ("Location".equals(header.getName())) {
-                    if (header.getValue().contains("https://secure.nicovideo.jp/secure/login")) {
+                    if (header.getValue().contains("https://secure.nicovideo.jp/secure/login") ||
+                        header.getValue().contains("https://account.nicovideo.jp/login")) {
                         throw new NiconicoException("Invalid mail or password");
                     }
                     break;
@@ -54,4 +55,5 @@ public class NicoLogin {
             //ignore
         }
     }
+
 }
