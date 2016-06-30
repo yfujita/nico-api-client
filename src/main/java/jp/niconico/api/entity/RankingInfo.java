@@ -85,7 +85,7 @@ public class RankingInfo {
                 info.mylistCounter = Long.parseLong(desc.substring(0, desc.indexOf("</strong>")).replace(",", ""));
 
                 String tmpPeriod;
-                if ("hourly".equals(period) || "daily".equals(period) || "weekly".equals(period) || "monthly".equals(period)) {
+                if ("hourly".equals(period.toString()) || "daily".equals(period.toString()) || "weekly".equals(period.toString()) || "monthly".equals(period.toString())) {
                     tmpPeriod = period.toString();
                 } else {
                     tmpPeriod = "daily";
@@ -106,7 +106,7 @@ public class RankingInfo {
                 list.add(info);
             }
         } catch (Exception e) {
-            throw new NiconicoException(e.getMessage());
+            throw new NiconicoException(e);
         }
 
         return list;
@@ -130,5 +130,4 @@ public class RankingInfo {
             }
         }
     }
-
 }

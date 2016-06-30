@@ -10,14 +10,14 @@ import org.apache.http.util.EntityUtils;
 import java.util.List;
 
 public class NicoGetRanking {
-    private String methodUrl = "http://www.nicovideo.jp/ranking/";
+    private static final String methodUrl = "http://www.nicovideo.jp/ranking/";
 
-    public static enum PeriodType {
+    public enum PeriodType {
         HOURLY("hourly"), DAYLY("daily"), WEEKLY("weeky"), MONTHLY("monthly"), TOTAL("total");
 
         private final String str;
 
-        private PeriodType(String str) {
+        PeriodType(String str) {
             this.str = str;
         }
 
@@ -27,12 +27,12 @@ public class NicoGetRanking {
         }
     }
 
-    public static enum RankingType {
+    public enum RankingType {
         FAV("fav"), VIEW("view"), RES("res"), MYLIST("mylist");
 
         private final String str;
 
-        private RankingType(String str) {
+        RankingType(String str) {
             this.str = str;
         }
 
@@ -43,17 +43,16 @@ public class NicoGetRanking {
     }
 
     public List<RankingInfo> execute(HttpClient client, PeriodType period, RankingType rankType) throws NiconicoException {
-        List<RankingInfo> results = null;
         List<RankingInfo> rankingList = null;
         try {
             StringBuilder url = new StringBuilder(methodUrl);
-            if ("res".equals(rankType) || "mylist".equals(rankType) || "view".equals(rankType) || "fav".equals(rankType)) {
-                url.append(rankType);
+            if ("res".equals(rankType.toString()) || "mylist".equals(rankType.toString()) || "view".equals(rankType.toString()) || "fav".equals(rankType.toString())) {
+                url.append(rankType.toString());
                 url.append("/");
             }
-            if ("hourly".equals(period) || "daily".equals(period) || "weekly".equals(period) || "monthly".equals(period)
-                    || "total".equals(period)) {
-                url.append(period);
+            if ("hourly".equals(period.toString()) || "daily".equals(period.toString()) || "weekly".equals(period.toString()) || "monthly".equals(period.toString())
+                    || "total".equals(period.toString())) {
+                url.append(period.toString());
                 url.append("/");
             }
             url.append("all?rss=2.0");
@@ -63,14 +62,11 @@ public class NicoGetRanking {
 
             String xml = EntityUtils.toString(response.getEntity());
             rankingList = RankingInfo.parse(period, rankType, xml);
-
-
         } catch (Exception e) {
             throw new NiconicoException(e);
         } finally {
             //ignore
         }
-
 
         return rankingList;
     }

@@ -4,28 +4,26 @@ import jp.niconico.api.entity.*;
 import jp.niconico.api.exception.NiconicoException;
 import jp.niconico.api.method.NicoGetRanking;
 import jp.niconico.api.method.NicoSearch;
-import junit.framework.TestCase;
 import org.apache.commons.lang.StringUtils;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.*;
 
-public class NiconicoApiClientTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class NiconicoApiClientTest {
     private String mail = "";
 
     private String password = "";
 
-    public NiconicoApiClientTest(String name) {
-        super(name);
+    @Before
+    public void before() throws Exception {
+        Thread.sleep(1000);
     }
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        //request interval...
-        Thread.sleep(3000);
-    }
-
+    @Test
     public void test_login_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -37,6 +35,7 @@ public class NiconicoApiClientTest extends TestCase {
         }
     }
 
+    @Test
     public void test_login_fail() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -48,6 +47,7 @@ public class NiconicoApiClientTest extends TestCase {
         fail();
     }
 
+    @Test
     public void test_search_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -69,19 +69,20 @@ public class NiconicoApiClientTest extends TestCase {
                     assertTrue(result.totalCount > 0);
                 }
                 tagsearch = true;
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             }
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void test_get_comment_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
             client.login(mail, password);
             List<CommentInfo> comments = client.getComment("sm1283816");
-            assertTrue(comments.size() >= 1000);
+            assertTrue("comment size:" + comments.size(), comments.size() >= 500);
             for (CommentInfo comment : comments) {
                 assertTrue(StringUtils.isNotBlank(comment.msg));
                 assertNotNull(comment.id);
@@ -94,6 +95,7 @@ public class NiconicoApiClientTest extends TestCase {
         }
     }
 
+    @Test
     public void test_get_pastcomment_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -117,6 +119,7 @@ public class NiconicoApiClientTest extends TestCase {
 
     }
 
+    @Test
     public void test_get_thumbinfo_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -133,49 +136,47 @@ public class NiconicoApiClientTest extends TestCase {
         }
     }
 
-    public void test_get_ranking_success() {
+    @Test
+    public void test_get_ranking_success() throws Exception {
         NiconicoApiClient client = new NiconicoApiClient();
-        try {
-            NicoGetRanking.PeriodType[] periods = {NicoGetRanking.PeriodType.HOURLY,
-                    NicoGetRanking.PeriodType.DAYLY,
-                    NicoGetRanking.PeriodType.WEEKLY,
-                    NicoGetRanking.PeriodType.MONTHLY,
-                    NicoGetRanking.PeriodType.TOTAL};
-            NicoGetRanking.RankingType[] types = {NicoGetRanking.RankingType.FAV,
-                    NicoGetRanking.RankingType.VIEW,
-                    NicoGetRanking.RankingType.RES,
-                    NicoGetRanking.RankingType.MYLIST};
-            for (NicoGetRanking.PeriodType period : periods) {
+        NicoGetRanking.PeriodType[] periods = {NicoGetRanking.PeriodType.HOURLY,
+                NicoGetRanking.PeriodType.DAYLY,
+                NicoGetRanking.PeriodType.WEEKLY,
+                NicoGetRanking.PeriodType.MONTHLY,
+                NicoGetRanking.PeriodType.TOTAL};
+        NicoGetRanking.RankingType[] types = {NicoGetRanking.RankingType.FAV,
+                NicoGetRanking.RankingType.VIEW,
+                NicoGetRanking.RankingType.RES,
+                NicoGetRanking.RankingType.MYLIST};
+        for (NicoGetRanking.PeriodType period : periods) {
 
-                for (NicoGetRanking.RankingType type : types) {
-                    List<RankingInfo> results = client.getRanking(period, type);
-                    assertTrue(results.size() == 100);
-                    long rank = 1;
-                    for (RankingInfo result : results) {
-                        assertTrue(StringUtils.isNotEmpty(result.title));
-                        assertNotNull(result.link);
-                        assertNotNull(result.date);
-                        assertNotNull(result.description);
-                        assertNotNull(result.period);
-                        assertNotNull(result.thumbnailUrl);
-                        assertTrue(result.viewCounter > 0);
-                        assertTrue(result.viewCounter >= result.viewCounterPeriod);
-                        assertTrue(result.commentNum >= 0);
-                        assertTrue(result.commentNum >= result.commentNumPeriod);
-                        assertTrue(result.mylistCounter >= 0);
-                        assertTrue(result.mylistCounter >= result.mylistCounterPeriod);
-                        assertEquals(result.rank, rank);
-                        rank++;
-                    }
-
-                    Thread.sleep(3000);
+            for (NicoGetRanking.RankingType type : types) {
+                List<RankingInfo> results = client.getRanking(period, type);
+                assertTrue(results.size() == 100);
+                long rank = 1;
+                for (RankingInfo result : results) {
+                    assertTrue(StringUtils.isNotEmpty(result.title));
+                    assertNotNull(result.link);
+                    assertNotNull(result.date);
+                    assertNotNull(result.description);
+                    assertNotNull(result.period);
+                    assertNotNull(result.thumbnailUrl);
+                    assertTrue(result.viewCounter > 0);
+                    assertTrue(result.viewCounter >= result.viewCounterPeriod);
+                    assertTrue(result.commentNum >= 0);
+                    assertTrue(result.commentNum >= result.commentNumPeriod);
+                    assertTrue(result.mylistCounter >= 0);
+                    assertTrue(result.mylistCounter >= result.mylistCounterPeriod);
+                    assertEquals(result.rank, rank);
+                    rank++;
                 }
+
+                Thread.sleep(1000);
             }
-        } catch (Exception e) {
-            fail(e.getMessage());
         }
     }
 
+    @Test
     public void test_get_mylist_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -198,13 +199,14 @@ public class NiconicoApiClientTest extends TestCase {
                     assertTrue(StringUtils.isNotBlank(item.itemId));
                     assertTrue(item.viewCounter > 0);
                 }
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             }
         } catch (Exception e) {
             fail(e.getMessage());
         }
     }
 
+    @Test
     public void test_get_とりあえずマイリスト_sccess() {
         NiconicoApiClient client = new NiconicoApiClient();
         try {
@@ -222,6 +224,7 @@ public class NiconicoApiClientTest extends TestCase {
 
     }
 
+    @Test
     public void test_download_success() {
         NiconicoApiClient client = new NiconicoApiClient();
         File file = null;
